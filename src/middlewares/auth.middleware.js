@@ -13,9 +13,10 @@ const verifyJWT = asyncHandler(async (req, _, next) => {
       throw new ApiError(401, "Unauthorized request");
     }
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    console.log(decodedToken);
 
-    const user = await User.findById(decodedToken?.accessToken).select(
-      "-password refreshToken"
+    const user = await User.findById(decodedToken?._id).select(
+      "-password -refreshToken"
     );
     if (!user) {
       throw new ApiError(401, "Invaild Access token");
@@ -25,6 +26,7 @@ const verifyJWT = asyncHandler(async (req, _, next) => {
 
     next();
   } catch (error) {
+    console.log(error);
     throw new ApiError(401, error?.message || "Invaild Access token");
   }
 });
