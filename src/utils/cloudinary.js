@@ -13,10 +13,12 @@ const uploadOnCloudinary = async (localFilePath) => {
   try {
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
+      folder: "chai-backend",
     });
 
     // file has been uploaded successfully
-    console.log(`file is uploaded on cloudinary: ${response.url}`);
+    // console.log(`Cloudinary response: `, response);
+    // console.log(`file is uploaded on cloudinary: `, response.url);
     fs.unlinkSync(localFilePath);
     return response;
   } catch (error) {
