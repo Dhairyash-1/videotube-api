@@ -26,4 +26,17 @@ const uploadOnCloudinary = async (localFilePath) => {
   }
 };
 
-export { uploadOnCloudinary };
+const deleteResourceOnCloudinary = async (cloudinaryUrl) => {
+  try {
+    const response = await cloudinary.uploader.destroy(cloudinaryUrl, {
+      resource_type: "auto",
+      folder: "chai-backend",
+    });
+
+    return response;
+  } catch (error) {
+    console.log(`Error on deleteing resource from cloudinary`, error);
+  }
+};
+
+export { uploadOnCloudinary, deleteResourceOnCloudinary };

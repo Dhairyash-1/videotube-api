@@ -196,7 +196,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
-  const user = User.findById(req.user?._id); // if user logged in then we can access user object
+  const user = await User.findById(req.user?._id); // if user logged in then we can access user object
 
   const isPasswordVaild = await user.isPasswordCorrect(oldPassword);
 
@@ -221,7 +221,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { email, fullName } = req.body;
-  if (!(email && fullName)) {
+  if (!(email || fullName)) {
     throw new ApiError(400, "All fields are required");
   }
 
