@@ -2,7 +2,10 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  deleteResourceOnCloudinary,
+  uploadOnCloudinary,
+} from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 
 const generateAccessandRefreshToken = async (userid) => {
@@ -61,9 +64,12 @@ const registerUser = asyncHandler(async (req, res) => {
   const user = await User.create({
     fullName,
     username: username.toLowerCase(),
-    avatar: avatar.url,
+    avatar: { url: avatar.url, public_id: avatar.public_id },
     email,
-    coverImage: coverImage?.url || "",
+    coverImage: {
+      url: coverImage.url || "",
+      public_id: coverImage.public_id || "",
+    },
     password,
   });
 
@@ -253,12 +259,15 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   if (!avatar.url) {
     throw new ApiError(500, "avatar upload on cloudinary failed");
   }
+  // delete the previous avatar image from cloud
+
+  await deleteResourceOnCloudinary(req.user?.avatar?.public_id);
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
-        avatar: avatar.url,
+        avatar: { url: avatar.url, public_id: avatar.public_id },
       },
     },
     { new: true }
@@ -281,12 +290,13 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   if (!coverImage.url) {
     throw new ApiError(500, "Cover Image upload on cloudinary failed");
   }
+  await deleteResourceOnCloudinary(req.user?.coverImage?.public_id);
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
-        coverImage: coverImage.url,
+        coverImage: { url: coverImage.url, public_id: coverImage.public_id },
       },
     },
     { new: true }
