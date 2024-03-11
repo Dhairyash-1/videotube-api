@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+
 import fs from "fs";
 
 cloudinary.config({
@@ -27,17 +28,31 @@ const uploadOnCloudinary = async (localFilePath) => {
   }
 };
 
-const deleteResourceOnCloudinary = async (publicId) => {
-  // console.log("--publicId", publicId);
+const deleteResourceOnCloudinary = async (url, type) => {
+  // console.log("url", url);
+  let publicId;
+
+  // Check if the URL includes the Cloudinary domain
+  if (url.includes("res.cloudinary.com")) {
+    const parts = url.split("/");
+    const publicIdIndex = parts.indexOf("upload") + 2;
+    publicId = parts.slice(publicIdIndex).join("/").slice(0, -4);
+  } else {
+    // If it's not a Cloudinary URL, assume it's already the publicId
+    publicId = url;
+  }
+
+  // console.log("publicId", publicId);
+
   try {
     const response = await cloudinary.uploader.destroy(publicId, {
-      resource_type: "image",
+      resource_type: type || "image",
       folder: "chai-backend",
     });
-
+    console.log(response);
     return response;
   } catch (error) {
-    console.error(`Error on deleteing resource from cloudinary`, error);
+    console.error(`Error on deleting resource from Cloudinary`, error);
   }
 };
 
