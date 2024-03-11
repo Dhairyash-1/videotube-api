@@ -14,6 +14,7 @@ const uploadOnCloudinary = async (localFilePath) => {
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
       folder: "chai-backend",
+      media_metadata: true,
     });
 
     // file has been uploaded successfully
