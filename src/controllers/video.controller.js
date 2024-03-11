@@ -119,11 +119,49 @@ const updateVideo = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "VideoId is not vaild");
+  }
+
+  const deleteVideo = await Video.findByIdAndDelete(videoId);
+  if (!deleteVideo) {
+    throw new ApiError(500, "Video not found or already deleted");
+  }
+  // delete the thumbnail and video from cloudinary
+  await deleteResourceOnCloudinary(deleteVideo?.videoFile, "video");
+  await deleteResourceOnCloudinary(deleteVideo?.thumbnail);
+
+  console.log(deleteVideo);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Video deleted successfully"));
+
   //TODO: delete video
 });
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
+
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "VideoId is not vaild");
+  }
+
+  const video = await Video.findById(videoId);
+  if (!video) throw new ApiError(500, "Video not found");
+
+  video.isPublished = !video.isPublished;
+  const updatedVideo = await video.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        updatedVideo,
+        "Video Publish Status Updated Successfully"
+      )
+    );
 });
 
 export {
