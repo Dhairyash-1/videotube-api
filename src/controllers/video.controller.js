@@ -4,7 +4,10 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  deleteResourceOnCloudinary,
+  uploadOnCloudinary,
+} from "../utils/cloudinary.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -70,11 +73,52 @@ const getVideoById = asyncHandler(async (req, res) => {
 
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
+  const { title, description, thumbnail } = req.body;
+
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "VideoId is not vaild");
+  }
+
   //TODO: update video details like title, description, thumbnail
+  if (!(title || description || thumbnail)) {
+    throw new ApiError(400, "All fields are required to update Video");
+  }
+
+  const thumbnailLocalPath = req.file?.path;
+  if (!thumbnailLocalPath) {
+    throw new ApiError(400, "Thumbnail file is missing");
+  }
+
+  const newThumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+  if (!newThumbnail.url) {
+    throw new ApiError(500, "Thumbnail upload on cloudinary failed");
+  }
+
+  const video = await Video.findById(videoId);
+  await deleteResourceOnCloudinary(video.thumbnail);
+
+  const videoUpdate = await Video.findByIdAndUpdate(
+    videoId,
+    {
+      $set: {
+        title: title,
+        description: description,
+        thumbnail: newThumbnail.url,
+      },
+    },
+    { new: true }
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, videoUpdate, "Video Details Updated Successfully")
+    );
 });
 
 const deleteVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
+
   //TODO: delete video
 });
 
