@@ -11,7 +11,63 @@ import {
 
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
-  //TODO: get all videos based on query, sort, pagination
+
+  if (!isValidObjectId(userId)) {
+    throw new ApiError(400, "UserId is not vaild");
+  }
+
+  // find video of the owner using userId
+  const matchConditions = {
+    owner: new mongoose.Types.ObjectId(userId),
+  };
+
+  // if query parameter is defined so find video that matched to query
+  if (query) {
+    const queryArr = query.split(" ");
+    const regexConditions = queryArr.map((word) => ({
+      $or: [
+        {
+          title: { $regex: new RegExp("\\b" + word + "\\b", "i") },
+        },
+        {
+          description: { $regex: new RegExp("\\b" + word + "\\b", "i") },
+        },
+      ],
+    }));
+
+    // Use $or to match any condition in the array
+    matchConditions.$or = regexConditions;
+  }
+
+  const sortOptions = {};
+  if (sortBy && sortType) {
+    // SortBy: createdAt or views or durations
+    sortOptions[sortBy] = sortType === "desc" ? -1 : 1;
+  }
+
+  const pipeline = [
+    {
+      $match: matchConditions,
+    },
+    ...(sortBy && sortType ? [{ $sort: sortOptions }] : []),
+    {
+      $skip: page ? (page - 1) * limit : 0,
+    },
+    {
+      $limit: limit ? parseInt(limit) : 0,
+    },
+  ];
+
+  // Find videos based on pipeline
+  const videos = await Video.aggregate(pipeline);
+
+  if (!videos || !videos.length) {
+    throw new ApiError(500, "No Videos is found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, videos, "All Videos Fetched Successfully"));
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
