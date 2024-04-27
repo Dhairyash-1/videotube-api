@@ -15,8 +15,10 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" })); // to access url
 app.use(express.static("public"));
 app.use(cookieParser());
 
-// Routes
+// middlewars import
+import errorHandler from "./middlewares/error.middleware.js";
 
+// Routes
 import userRouter from "./routes/user.routes.js";
 import videoRouter from "./routes/video.routes.js";
 import subscriptionRouter from "./routes/subscription.routes.js";
@@ -39,5 +41,8 @@ app.use("/api/v1/likes", likeRouter);
 app.use("/api/v1/dashboard", dashboardRouter);
 
 // http://localhost:8000/api/v1/users/register
+
+// middleware for application error handling
+app.use(errorHandler);
 
 export default app;
