@@ -8,7 +8,12 @@ import {
   deleteResourceOnCloudinary,
   uploadOnCloudinary,
 } from "../utils/cloudinary.js";
+import { Comment } from "../models/comment.model.js";
+import { Like } from "../models/like.model.js";
 
+// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
+// GET ALL VIDEOS CONTROLLER
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
 
@@ -70,9 +75,11 @@ const getAllVideos = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, videos, "All Videos Fetched Successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// PUBLISH A VIDEO CONTROLLER
 const publishAVideo = asyncHandler(async (req, res) => {
   const { title, description } = req.body;
-  // TODO: get video, upload to cloudinary, create video
 
   if (!(title.trim() && description.trim())) {
     throw new ApiError(400, "Video title and description is required!");
@@ -104,11 +111,18 @@ const publishAVideo = asyncHandler(async (req, res) => {
     owner: req.user?._id,
   });
 
+  if (!videoUpload) {
+    throw new ApiError(500, "Failed to upload the video");
+  }
+
   return res
     .status(200)
     .json(new ApiResponse(200, videoUpload, "Video Uploaded Successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// GET VIDEO BY ID CONTROLLER
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
@@ -204,6 +218,9 @@ const getVideoById = asyncHandler(async (req, res) => {
     );
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// UPDATE VIDEO CONTROLLER
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   const { title, description, thumbnail } = req.body;
@@ -212,8 +229,20 @@ const updateVideo = asyncHandler(async (req, res) => {
     throw new ApiError(400, "VideoId is not vaild");
   }
 
-  //TODO: update video details like title, description, thumbnail
-  if (!(title || description || thumbnail)) {
+  const video = await Video.findById(videoId);
+  if (!video) {
+    throw new ApiError(404, "video is not found");
+  }
+
+  // Check if the user is owner of the video
+  if (video.owner.toString() !== req.user?._id.toString()) {
+    throw new ApiError(
+      403,
+      "Unauthorized: you are not authorized to edit this video"
+    );
+  }
+
+  if (!(title && description && thumbnail)) {
     throw new ApiError(400, "All fields are required to update Video");
   }
 
@@ -222,14 +251,13 @@ const updateVideo = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Thumbnail file is missing");
   }
 
+  // Upload new thumbnail to Cloudinary
   const newThumbnail = await uploadOnCloudinary(thumbnailLocalPath);
   if (!newThumbnail.url) {
     throw new ApiError(500, "Thumbnail upload on cloudinary failed");
   }
 
-  const video = await Video.findById(videoId);
-  await deleteResourceOnCloudinary(video.thumbnail);
-
+  // Update video details in database
   const videoUpdate = await Video.findByIdAndUpdate(
     videoId,
     {
@@ -242,6 +270,13 @@ const updateVideo = asyncHandler(async (req, res) => {
     { new: true }
   );
 
+  if (!videoUpdate) {
+    throw new ApiError(500, "Failed to update the video");
+  }
+
+  // Delete the old thumbnail from Cloudinary
+  await deleteResourceOnCloudinary(video.thumbnail);
+
   return res
     .status(200)
     .json(
@@ -249,6 +284,9 @@ const updateVideo = asyncHandler(async (req, res) => {
     );
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// DELETE VIDEO CONTROLLER
 const deleteVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
@@ -256,23 +294,40 @@ const deleteVideo = asyncHandler(async (req, res) => {
     throw new ApiError(400, "VideoId is not vaild");
   }
 
-  const deleteVideo = await Video.findByIdAndDelete(videoId);
-  if (!deleteVideo) {
-    throw new ApiError(500, "Video not found or already deleted");
+  const video = await Video.findById(videoId);
+  if (!video) {
+    throw new ApiError(404, "Video is not found");
   }
+
+  // Check if the user is owner of the video
+  if (video.owner.toString() !== req.user?._id.toString()) {
+    throw new ApiError(
+      403,
+      "Unauthorized: you are not authorized to delete this video"
+    );
+  }
+
+  const deleteVideo = await Video.findByIdAndDelete(video._id);
+  if (!deleteVideo) {
+    throw new ApiError(500, "Failed to delete the video");
+  }
+
   // delete the thumbnail and video from cloudinary
   await deleteResourceOnCloudinary(deleteVideo?.videoFile, "video");
   await deleteResourceOnCloudinary(deleteVideo?.thumbnail);
 
-  console.log(deleteVideo);
+  // Delete the comments and likes of the video
+  await Comment.deleteMany({ video: videoId });
+  await Like.deleteMany({ video: videoId });
 
   return res
     .status(200)
     .json(new ApiResponse(200, "Video deleted successfully"));
-
-  //TODO: delete video
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// TOGGLE PUBLISH STATUS OF VIDEO CONTROLLER
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
@@ -283,8 +338,20 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
   const video = await Video.findById(videoId);
   if (!video) throw new ApiError(500, "Video not found");
 
+  // Check if the user is owner of the video
+  if (video.owner.toString() !== req.user?._id.toString()) {
+    throw new ApiError(
+      403,
+      "Unauthorized: you are not authorized to change publish status of this video"
+    );
+  }
+
   video.isPublished = !video.isPublished;
   const updatedVideo = await video.save({ validateBeforeSave: false });
+
+  if (!updateVideo) {
+    throw new ApiError(500, "Failed to toggle publish status of video");
+  }
 
   return res
     .status(200)
