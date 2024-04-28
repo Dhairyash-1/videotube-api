@@ -5,12 +5,16 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// TOGGLE SUBSCRIPTION CONTROLLER
 const toggleSubscription = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
 
   if (!isValidObjectId(channelId)) {
     throw new ApiError(400, "channelId is invaild");
   }
+
   const existingSubscriber = await Subscription.findOne({
     subscriber: req.user?._id,
     channel: channelId,
@@ -22,7 +26,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(new ApiResponse(200, {}, "Unsubscribed successfully"));
+      .json(new ApiResponse(200, {}, "Channel unsubscribed successfully"));
   } else {
     // If the subscriber does not exist, create it (subscribe)
     const newSubscriber = await Subscription.create({
@@ -32,11 +36,15 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(new ApiResponse(200, newSubscriber, "Subscribed Successfully"));
+      .json(
+        new ApiResponse(200, newSubscriber, "Channel subscribed Successfully")
+      );
   }
 });
 
-// controller to return subscriber list of a channel
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// GET SUBSCRIBERS OF CHANNEL CONTROLLER
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
 
@@ -108,7 +116,9 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     );
 });
 
-// controller to return channel list to which user has subscribed
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// GET CHANNELS TO WHICH USER SUBSCRIBED CONTROLLER
 const getSubscribedChannels = asyncHandler(async (req, res) => {
   const { subscriberId } = req.params;
 

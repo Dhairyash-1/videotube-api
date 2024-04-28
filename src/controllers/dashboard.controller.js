@@ -6,6 +6,9 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// GET STATS OF CHANNEL CONTROLLER
 const getChannelStats = asyncHandler(async (req, res) => {
   const subscribers = await Subscription.aggregate([
     {
@@ -62,6 +65,9 @@ const getChannelStats = asyncHandler(async (req, res) => {
     );
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// GET CHANNEL VIDEOS CONTROLLER
 const getChannelVideos = asyncHandler(async (req, res) => {
   const getAllVideos = await Video.aggregate([
     {

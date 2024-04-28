@@ -1,10 +1,13 @@
-import mongoose, { isValidObjectId, mongo } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 import { Like } from "../models/like.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Video } from "../models/video.model.js";
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// TOGGLE VIDEO LIKE CONTROLLER
 const toggleVideoLike = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
@@ -40,6 +43,9 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { isLiked: true }, "Video liked successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// TOGGLE COMMENT LIKE CONTROLLER
 const toggleCommentLike = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
 
@@ -78,6 +84,9 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     );
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// TOGGLE TWEET LIKE CONTROLLER
 const toggleTweetLike = asyncHandler(async (req, res) => {
   const { tweetId } = req.params;
 
@@ -114,6 +123,9 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { isLiked: true }, "Tweet liked successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// GET LIKED VIDEOS CONTROLLER
 const getLikedVideos = asyncHandler(async (req, res) => {
   const likedVideosAggregate = await Like.aggregate([
     {

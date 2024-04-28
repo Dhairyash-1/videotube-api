@@ -5,6 +5,9 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Video } from "../models/video.model.js";
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// GET VIDEO COMMENTS CONTROLLER
 const getVideoComments = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   const { page = 1, limit = 10 } = req.query;
@@ -86,6 +89,9 @@ const getVideoComments = asyncHandler(async (req, res) => {
     );
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// ADD COMMENT CONTROLLER
 const addComment = asyncHandler(async (req, res) => {
   const { content } = req.body;
   const { videoId } = req.params;
@@ -116,6 +122,9 @@ const addComment = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, comment, "Comment is made successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// UPDATE COMMENT CONTROLLER
 const updateComment = asyncHandler(async (req, res) => {
   const { content } = req.body;
   const { commentId } = req.params;
@@ -153,6 +162,9 @@ const updateComment = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, newComment, "Comment is updated successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// DELETE COMMENT CONTROLLER
 const deleteComment = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
 

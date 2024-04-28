@@ -7,9 +7,9 @@ import {
   uploadOnCloudinary,
 } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
-import { application } from "express";
 import mongoose from "mongoose";
 
+// METHOD TO GENERATE ACCESS AND REFRESH TOKEN
 const generateAccessandRefreshToken = async (userid) => {
   try {
     const user = await User.findById(userid);
@@ -30,8 +30,9 @@ const generateAccessandRefreshToken = async (userid) => {
   }
 };
 
-// Controllers
-
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// REGISTER USER CONTROLLER
 const registerUser = asyncHandler(async (req, res) => {
   // 1). Get user details from frontend
   const { username, email, fullName, password } = req.body;
@@ -90,6 +91,9 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, createdUser, "user registered successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// LOGIN USER CONTROLLER
 const loginUser = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
 
@@ -136,6 +140,9 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// LOGOUT USER CONTROLLER
 const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
@@ -156,6 +163,9 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User Loggedout Successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// REFRESH ACCESS TOKEN CONTROLLER
 const refreshAccessToken = asyncHandler(async (req, res) => {
   try {
     const incomingRefreshToken = req.cookies.refreshToken || req.body;
@@ -201,6 +211,9 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// CHANGE CURRENT PASSWORD CONTROLLER
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
@@ -221,12 +234,18 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Password Changed Successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// GET CURRENT USER CONTROLLER
 const getCurrentUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, req.user, "Current user fetched successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// UPDATE ACCOUNT DETAILS CONTROLLER
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { email, fullName } = req.body;
   if (!(email || fullName)) {
@@ -249,6 +268,9 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "user details updated successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// UPDATE USER AVATAR CONTROLLER
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
@@ -280,6 +302,9 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Avatar Updated Successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// UPDATE USER COVER IMAGE CONTROLLER
 const updateUserCoverImage = asyncHandler(async (req, res) => {
   const coverImageLocalPath = req.file?.path;
 
@@ -309,6 +334,9 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "coverImage Updated Successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// GET PROFILE OF USER CHANNEL CONTROLLER
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
   if (!username?.trim()) {
@@ -379,6 +407,9 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     );
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// GET WATCH HISTORY CONTROLLER
 const getWatchHistory = asyncHandler(async (req, res) => {
   const user = await User.aggregate([
     {

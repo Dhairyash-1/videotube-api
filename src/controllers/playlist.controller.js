@@ -5,6 +5,9 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// CREATE PLAYLIST CONTROLLER
 const createPlaylist = asyncHandler(async (req, res) => {
   const { name, description } = req.body;
 
@@ -26,6 +29,9 @@ const createPlaylist = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, playlist, "New Playlist is created"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// GET PLAYLISTS OF USER CONTROLLER
 const getUserPlaylists = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
@@ -101,6 +107,9 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
     );
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// GET PLAYLIST BY ID CONTROLLER
 const getPlaylistById = asyncHandler(async (req, res) => {
   const { playlistId } = req.params;
 
@@ -194,6 +203,9 @@ const getPlaylistById = asyncHandler(async (req, res) => {
     );
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// ADD VIDEO TO PLAYLIST CONTROLLER(BY OWNER)
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
   const { playlistId, videoId } = req.params;
 
@@ -241,6 +253,9 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, updatePlaylist, "New Video Added To Playlist"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// REMOVE VIDEO FROM PLAYLIST CONTROLLER(BY OWNER)
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
   const { playlistId, videoId } = req.params;
   // TODO: remove video from playlist
@@ -275,6 +290,9 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Video is removed from Playlist"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// DELETE PLAYLIST CONTROLLER(BY OWNER)
 const deletePlaylist = asyncHandler(async (req, res) => {
   const { playlistId } = req.params;
 
@@ -298,6 +316,9 @@ const deletePlaylist = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Playlist deleted Successfully"));
 });
 
+// ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
+// UPDATE PLAYLIST CONTROLLER(BY OWNER)
 const updatePlaylist = asyncHandler(async (req, res) => {
   const { playlistId } = req.params;
   const { name, description } = req.body;
