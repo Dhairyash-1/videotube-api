@@ -11,10 +11,6 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 const createTweet = asyncHandler(async (req, res) => {
   const { content } = req.body;
 
-  if (!content.trim()) {
-    throw new ApiError(400, "Content is required");
-  }
-
   const createTweet = await Tweet.create({
     content: content,
     owner: req.user?._id,
@@ -33,10 +29,6 @@ const createTweet = asyncHandler(async (req, res) => {
 // GET USERS TWEET CONTROLLER
 const getUserTweets = asyncHandler(async (req, res) => {
   const { userId } = req.params;
-
-  if (!isValidObjectId(userId)) {
-    throw new ApiError(400, "userId is not vaild");
-  }
 
   const findTweets = await Tweet.aggregate([
     {
@@ -76,7 +68,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
   ]);
 
   if (!findTweets.length) {
-    throw new ApiError(500, "Failed to fetched the user tweets");
+    throw new ApiError(404, "No tweets found");
   }
 
   return res
@@ -90,13 +82,6 @@ const getUserTweets = asyncHandler(async (req, res) => {
 const updateTweet = asyncHandler(async (req, res) => {
   const { content } = req.body;
   const { tweetId } = req.params;
-
-  if (!content.trim()) {
-    throw new ApiError(400, "content is required");
-  }
-  if (!isValidObjectId(tweetId)) {
-    throw new ApiError(400, "userId is not vaild");
-  }
 
   const tweet = await Tweet.findById(tweetId);
 
@@ -132,9 +117,6 @@ const updateTweet = asyncHandler(async (req, res) => {
 // DELETE TWEET CONTROLLER
 const deleteTweet = asyncHandler(async (req, res) => {
   const { tweetId } = req.params;
-  if (!isValidObjectId(tweetId)) {
-    throw new ApiError(400, "userId is not vaild");
-  }
 
   const tweet = await Tweet.findById(tweetId);
 

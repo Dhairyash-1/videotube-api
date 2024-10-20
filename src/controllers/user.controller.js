@@ -43,6 +43,7 @@ const registerUser = asyncHandler(async (req, res) => {
   ) {
     throw new ApiError(400, "All fields are required");
   }
+
   // 3). check is user already exist or not: username or email
   const existedUser = await User.findOne({
     $or: [{ username }, { email }],
@@ -98,7 +99,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
 
   if (!(username || email)) {
-    throw new ApiError(409, "username or email required");
+    throw new ApiError(400, "username or email required");
   }
 
   const user = await User.findOne({
@@ -106,7 +107,7 @@ const loginUser = asyncHandler(async (req, res) => {
   });
 
   if (!user) {
-    throw new ApiError(400, "User does not exist");
+    throw new ApiError(404, "User does not exist");
   }
 
   const isPasswordVaild = await user.isPasswordCorrect(password);
@@ -168,7 +169,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 // REFRESH ACCESS TOKEN CONTROLLER
 const refreshAccessToken = asyncHandler(async (req, res) => {
   try {
-    const incomingRefreshToken = req.cookies.refreshToken || req.body;
+    const incomingRefreshToken =
+      req.cookies.refreshToken || req.body.refreshToken;
 
     if (!incomingRefreshToken) {
       throw new ApiError(401, "Unauthorized request");
@@ -184,7 +186,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Invaild refresh token");
     }
 
-    if (user.refreshAccessToken !== incomingRefreshToken) {
+    if (user.refreshToken !== incomingRefreshToken) {
       throw new ApiError(401, "Refresh token is expired or used");
     }
     const { accessToken, newRefreshToken } = generateAccessandRefreshToken(
@@ -194,6 +196,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true,
     };
+
+    // save new refresh token in db
+    user.refreshToken = newRefreshToken;
+    await user.save();
 
     res
       .status(200)
@@ -274,10 +280,6 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
-  if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar file is missing");
-  }
-
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
   if (!avatar.url) {
@@ -307,10 +309,6 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 // UPDATE USER COVER IMAGE CONTROLLER
 const updateUserCoverImage = asyncHandler(async (req, res) => {
   const coverImageLocalPath = req.file?.path;
-
-  if (!coverImageLocalPath) {
-    throw new ApiError(400, "Cover Image file is missing");
-  }
 
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 

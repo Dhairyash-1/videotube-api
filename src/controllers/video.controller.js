@@ -17,10 +17,6 @@ import { Like } from "../models/like.model.js";
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
 
-  if (!isValidObjectId(userId)) {
-    throw new ApiError(400, "UserId is not vaild");
-  }
-
   // find video of the owner using userId
   const matchConditions = {
     owner: new mongoose.Types.ObjectId(userId),
@@ -126,9 +122,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
-  if (!isValidObjectId(videoId))
-    throw new ApiError(400, "VideoId is not vaild");
-
   const videoAggregation = await Video.aggregate([
     {
       $match: {
@@ -223,11 +216,7 @@ const getVideoById = asyncHandler(async (req, res) => {
 // UPDATE VIDEO CONTROLLER
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-  const { title, description, thumbnail } = req.body;
-
-  if (!isValidObjectId(videoId)) {
-    throw new ApiError(400, "VideoId is not vaild");
-  }
+  const { title, description } = req.body;
 
   const video = await Video.findById(videoId);
   if (!video) {
@@ -242,14 +231,7 @@ const updateVideo = asyncHandler(async (req, res) => {
     );
   }
 
-  if (!(title && description && thumbnail)) {
-    throw new ApiError(400, "All fields are required to update Video");
-  }
-
   const thumbnailLocalPath = req.file?.path;
-  if (!thumbnailLocalPath) {
-    throw new ApiError(400, "Thumbnail file is missing");
-  }
 
   // Upload new thumbnail to Cloudinary
   const newThumbnail = await uploadOnCloudinary(thumbnailLocalPath);
@@ -290,10 +272,6 @@ const updateVideo = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
-  if (!isValidObjectId(videoId)) {
-    throw new ApiError(400, "VideoId is not vaild");
-  }
-
   const video = await Video.findById(videoId);
   if (!video) {
     throw new ApiError(404, "Video is not found");
@@ -330,10 +308,6 @@ const deleteVideo = asyncHandler(async (req, res) => {
 // TOGGLE PUBLISH STATUS OF VIDEO CONTROLLER
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-
-  if (!isValidObjectId(videoId)) {
-    throw new ApiError(400, "VideoId is not vaild");
-  }
 
   const video = await Video.findById(videoId);
   if (!video) throw new ApiError(500, "Video not found");

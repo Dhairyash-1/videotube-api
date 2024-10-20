@@ -11,8 +11,10 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 const toggleSubscription = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
 
-  if (!isValidObjectId(channelId)) {
-    throw new ApiError(400, "channelId is invaild");
+  const isChannelExist = await User.findById({ _id: channelId });
+
+  if (!isChannelExist) {
+    throw new ApiError(404, "Channel does not exist");
   }
 
   const existingSubscriber = await Subscription.findOne({
@@ -47,10 +49,6 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 // GET SUBSCRIBERS OF CHANNEL CONTROLLER
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
-
-  if (!isValidObjectId(channelId)) {
-    throw new ApiError(400, "channelId is invaild");
-  }
 
   // find the subscribers of channels
   const subscribers = await User.aggregate([
@@ -121,10 +119,6 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 // GET CHANNELS TO WHICH USER SUBSCRIBED CONTROLLER
 const getSubscribedChannels = asyncHandler(async (req, res) => {
   const { subscriberId } = req.params;
-
-  if (!isValidObjectId(subscriberId)) {
-    throw new ApiError(400, "subscriberId is invaild");
-  }
 
   const subscribedToChannels = await User.aggregate([
     {

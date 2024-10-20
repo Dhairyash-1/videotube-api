@@ -96,13 +96,6 @@ const addComment = asyncHandler(async (req, res) => {
   const { content } = req.body;
   const { videoId } = req.params;
 
-  if (!isValidObjectId(videoId)) {
-    throw new ApiError(400, "videoId is not vaild");
-  }
-  if (!content.trim()) {
-    throw new ApiError(400, "Content is required to make comment");
-  }
-
   const video = await Video.findById(videoId);
   if (!video) {
     throw new ApiError(404, "Video not found");
@@ -128,13 +121,6 @@ const addComment = asyncHandler(async (req, res) => {
 const updateComment = asyncHandler(async (req, res) => {
   const { content } = req.body;
   const { commentId } = req.params;
-
-  if (!isValidObjectId(commentId)) {
-    throw new ApiError(400, "commentId is not vaild");
-  }
-  if (!content.trim()) {
-    throw new ApiError(400, "Content is required to update the comment");
-  }
 
   const comment = await Comment.findById(commentId);
   if (!comment) {
@@ -167,10 +153,6 @@ const updateComment = asyncHandler(async (req, res) => {
 // DELETE COMMENT CONTROLLER
 const deleteComment = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
-
-  if (!isValidObjectId(commentId)) {
-    throw new ApiError(400, "commentId is not vaild");
-  }
 
   const comment = await Comment.findById(commentId);
   if (!comment) {
