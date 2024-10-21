@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { ApiError } from "../utils/ApiError.js";
+import logger from "../logger/winston.logger.js";
 
 const errorHandler = (err, req, res, next) => {
   let error = err;
@@ -11,7 +12,7 @@ const errorHandler = (err, req, res, next) => {
 
     error = new ApiError(statusCode, message);
   }
-
+  logger.error(error.message);
   const response = {
     ...error,
     message: error.message,

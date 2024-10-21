@@ -15,6 +15,8 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" })); // to access url
 app.use(express.static("public"));
 app.use(cookieParser());
 
+app.use(morganMiddleware);
+
 // middlewars import
 import errorHandler from "./middlewares/error.middleware.js";
 
@@ -28,6 +30,7 @@ import commentRouter from "./routes/comment.routes.js";
 import likeRouter from "./routes/like.routes.js";
 import healthcheckRouter from "./routes/healthcheck.routes.js";
 import dashboardRouter from "./routes/dashboard.routes.js";
+import morganMiddleware from "./logger/morgan.logger.js";
 
 // Routes declaration
 app.use("/api/v1/healthCheck", healthcheckRouter);
