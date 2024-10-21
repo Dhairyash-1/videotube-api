@@ -18,6 +18,7 @@ import {
   updateVideoValidator,
 } from "../validators/video.validator.js";
 import { validate } from "../validators/validate.js";
+import { videoUploadRateLimit } from "../utils/ratelimiting.js";
 
 const router = Router();
 router.use(verifyJWT); // Apply verifyJWT middleware to all routes in this file
@@ -38,6 +39,7 @@ router
     ]),
     publishAVideoValidator(),
     validate,
+    videoUploadRateLimit,
     publishAVideo
   );
 
