@@ -1,0 +1,21 @@
+services:
+  backend:
+    image: videotubeapi
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    volumes:
+      - data:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  data:
