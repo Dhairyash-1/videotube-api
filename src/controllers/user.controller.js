@@ -55,7 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // 4). check for image and avatar
   // console.log(`multer files:`, req.files);
   const avatarLocalPath = req.files?.avatar[0].path;
-  if (!avatarLocalPath) throw new ApiError(400, "Avatar File is required");
+  // if (!avatarLocalPath) throw new ApiError(400, "Avatar File is required");
   const coverImageLocalPath = req.files?.coverImage[0].path;
   // 5). upload them to cloudinary
 

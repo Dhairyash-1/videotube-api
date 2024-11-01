@@ -36,6 +36,38 @@ const userRegisterValidator = () => {
       .withMessage("Full name must be between 1 and 50 characters long")
       .matches(/^[a-zA-Z\s]+$/)
       .withMessage("Full name can only contain letters and spaces"),
+    body("avatar").custom((value, { req }) => {
+      if (!req.files || !req.files.avatar || req.files.avatar.length === 0) {
+        throw new Error("Avatar file is missing");
+      }
+      const avatarFile = req.files.avatar[0];
+      if (!allowedImageTypes.includes(avatarFile.mimetype)) {
+        throw new Error(
+          "Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed."
+        );
+      }
+      if (avatarFile.size > MAX_IMAGE_SIZE) {
+        // 1 MB limit
+        throw new Error("Maximum file size of avatar must be 1MB");
+      }
+
+      if (!req.files.coverImage || req.files.coverImage.length === 0) {
+        throw new Error("CoverImage file is missing");
+      }
+
+      const coverImageFile = req.files.coverImage[0];
+
+      if (!allowedImageTypes.includes(coverImageFile.mimetype)) {
+        throw new Error(
+          "Invalid CoverImage format. Only JPG, PNG, GIF, and WEBP are allowed."
+        );
+      }
+      if (coverImageFile.size > MAX_IMAGE_SIZE) {
+        throw new Error("CoverImage file size must not exceed 1MB.");
+      }
+
+      return true;
+    }),
   ];
 };
 
